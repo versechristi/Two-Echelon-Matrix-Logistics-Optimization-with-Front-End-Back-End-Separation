@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Logistics Optimization Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="container-fluid vh-100 d-flex flex-column p-3">
+
+        <header class="pb-2 mb-3 border-bottom d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-truck-fast fa-2x me-3 text-primary"></i>
+                <h3 class="fw-light">Logistics Optimization Dashboard <small class="text-muted fs-6 d-none d-lg-inline">MD-2E-VRPSD</small></h3>
+            </div>
+            <div id="global-best-summary" class="text-end small d-none">
+                <strong>Best Solution:</strong> <span id="best-algo-name" class="badge bg-success"></span>
+                <span id="best-algo-cost" class="fw-bold ms-2"></span>
+            </div>
+        </header>
+
+        <div class="row flex-grow-1 gx-3">
+
+            <div class="col-lg-4 d-flex flex-column">
+                <div class="card shadow-sm h-100 d-flex flex-column">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa-solid fa-sliders me-2"></i>Control Panel</h5>
+                        <div>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="loadConfigBtn" title="Load Configuration"><i class="fa-solid fa-folder-open"></i></button>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="saveConfigBtn" title="Save Configuration"><i class="fa-solid fa-save"></i></button>
+                        </div>
+                        <input type="file" id="loadConfigFile" class="d-none" accept=".ini">
+                    </div>
+                    <div class="card-body overflow-auto p-3">
+                        <div class="accordion" id="parametersAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDataGen"><i class="fa-solid fa-database me-2"></i>Data Generation</button></h2>
+                                <div id="collapseDataGen" class="accordion-collapse collapse show" data-bs-parent="#parametersAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row g-2">
+                                            <div class="col-6"><label for="num_logistics_centers" class="form-label">Centers</label><input type="number" class="form-control" id="num_logistics_centers" value="2"></div>
+                                            <div class="col-6"><label for="num_sales_outlets" class="form-label">Outlets</label><input type="number" class="form-control" id="num_sales_outlets" value="10"></div>
+                                            <div class="col-6"><label for="num_customers" class="form-label">Customers</label><input type="number" class="form-control" id="num_customers" value="50"></div>
+                                            <div class="col-6"><label for="radius_km" class="form-label">Radius (km)</label><input type="number" class="form-control" id="radius_km" value="15.0"></div>
+                                            <div class="col-6"><label for="min_demand" class="form-label">Min Demand</label><input type="number" class="form-control" id="min_demand" value="5.0"></div>
+                                            <div class="col-6"><label for="max_demand" class="form-label">Max Demand</label><input type="number" class="form-control" id="max_demand" value="25.0"></div>
+                                            <hr class="my-3">
+                                            <div class="col-6"><label for="center_latitude" class="form-label">Center Lat.</label><input type="number" step="any" class="form-control" id="center_latitude" value="39.9042"></div>
+                                            <div class="col-6"><label for="center_longitude" class="form-label">Center Lon.</label><input type="number" step="any" class="form-control" id="center_longitude" value="116.4074"></div>
+
+                                            <div class="col-12">
+                                                <div class="form-check form-switch mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="use_solomon_like_distribution">
+                                                    <label class="form-check-label" for="use_solomon_like_distribution">Solomon-like Distribution</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 d-grid mt-2">
+                                                <button class="btn btn-primary btn-sm" type="button" id="generateDataBtn">
+                                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                                    <i class="fa-solid fa-plus me-1"></i> Generate New Data
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFleets"><i class="fa-solid fa-truck me-2"></i>Fleet Parameters</button></h2>
+                                <div id="collapseFleets" class="accordion-collapse collapse" data-bs-parent="#parametersAccordion">
+                                     <div class="accordion-body">
+                                        <h6><i class="fa-solid fa-truck text-secondary me-1"></i> Vehicle</h6>
+                                        <div class="row g-2">
+                                            <div class="col-4"><label for="vehicle_payload" class="form-label">Payload (kg)</label><input type="number" class="form-control" id="vehicle_payload" value="100.0"></div>
+                                            <div class="col-4"><label for="vehicle_cost" class="form-label">Cost/km</label><input type="number" class="form-control" id="vehicle_cost" value="2.0"></div>
+                                            <div class="col-4"><label for="vehicle_speed" class="form-label">Speed (km/h)</label><input type="number" class="form-control" id="vehicle_speed" value="40.0"></div>
+                                        </div>
+                                        <hr class="my-3">
+                                        <h6><i class="fa-solid fa-helicopter text-secondary me-1"></i> Drone</h6>
+                                        <div class="row g-2">
+                                            <div class="col-4"><label for="drone_payload" class="form-label">Payload (kg)</label><input type="number" class="form-control" id="drone_payload" value="5.0"></div>
+                                            <div class="col-4"><label for="drone_cost" class="form-label">Cost/km</label><input type="number" class="form-control" id="drone_cost" value="1.0"></div>
+                                            <div class="col-4"><label for="drone_speed" class="form-label">Speed (km/h)</label><input type="number" class="form-control" id="drone_speed" value="60.0"></div>
+                                            <div class="col-12"><label for="drone_range" class="form-label">Max Range (km)</label><input type="number" class="form-control" id="drone_range" value="10.0"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObjective"><i class="fa-solid fa-bullseye me-2"></i>Objective Function</button></h2>
+                                <div id="collapseObjective" class="accordion-collapse collapse" data-bs-parent="#parametersAccordion">
+                                    <div class="accordion-body">
+                                        <label for="cost_weight" class="form-label">Cost Weight: <span id="cost_weight_label" class="fw-bold">0.60</span></label>
+                                        <input type="range" class="form-range" id="cost_weight" min="0" max="1" step="0.01" value="0.6">
+                                        <label for="time_weight" class="form-label">Time Weight: <span id="time_weight_label" class="fw-bold">0.40</span></label>
+                                        <input type="range" class="form-range" id="time_weight" min="0" max="1" step="0.01" value="0.4">
+                                        <label for="unmet_demand_penalty" class="form-label">Unmet Demand Penalty</label>
+                                        <input type="number" class="form-control" id="unmet_demand_penalty" value="10000.0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAlgos"><i class="fa-solid fa-cogs me-2"></i>Algorithm Parameters</button></h2>
+                                <div id="collapseAlgos" class="accordion-collapse collapse" data-bs-parent="#parametersAccordion">
+                                    <div class="accordion-body p-0">
+                                        <div class="accordion accordion-flush" id="algoParamsAccordion">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header"><button class="accordion-button accordion-button-sm collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gaParams">Genetic Algorithm (GA)</button></h2>
+                                                <div id="gaParams" class="accordion-collapse collapse" data-bs-parent="#algoParamsAccordion"><div class="accordion-body"><div class="row g-2">
+                                                    <div class="col-6"><label class="form-label">Population</label><input type="number" class="form-control form-control-sm" id="ga_pop_size" value="100"></div>
+                                                    <div class="col-6"><label class="form-label">Generations</label><input type="number" class="form-control form-control-sm" id="ga_gens" value="300"></div>
+                                                    <div class="col-6"><label class="form-label">Mutation Rate</label><input type="number" step="any" class="form-control form-control-sm" id="ga_mut_rate" value="0.05"></div>
+                                                    <div class="col-6"><label class="form-label">Crossover Rate</label><input type="number" step="any" class="form-control form-control-sm" id="ga_cross_rate" value="0.9"></div>
+                                                    <div class="col-6"><label class="form-label">Elite Count</label><input type="number" class="form-control form-control-sm" id="ga_elitism" value="5"></div>
+                                                    <div class="col-6"><label class="form-label">Tournament Size</label><input type="number" class="form-control form-control-sm" id="ga_tourn_size" value="5"></div>
+                                                </div></div></div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header"><button class="accordion-button accordion-button-sm collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#saParams">Simulated Annealing (SA)</button></h2>
+                                                <div id="saParams" class="accordion-collapse collapse" data-bs-parent="#algoParamsAccordion"><div class="accordion-body"><div class="row g-2">
+                                                    <div class="col-6"><label class="form-label">Initial Temp.</label><input type="number" step="any" class="form-control form-control-sm" id="sa_init_temp" value="2000.0"></div>
+                                                    <div class="col-6"><label class="form-label">Cooling Rate</label><input type="number" step="any" class="form-control form-control-sm" id="sa_cool_rate" value="0.99"></div>
+                                                    <div class="col-6"><label class="form-label">Iterations</label><input type="number" class="form-control form-control-sm" id="sa_iters" value="20000"></div>
+                                                    <div class="col-6"><label class="form-label">Min Temp.</label><input type="number" step="any" class="form-control form-control-sm" id="sa_min_temp" value="0.01"></div>
+                                                </div></div></div>
+                                            </div>
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header"><button class="accordion-button accordion-button-sm collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#psoParams">Particle Swarm (PSO)</button></h2>
+                                                <div id="psoParams" class="accordion-collapse collapse" data-bs-parent="#algoParamsAccordion"><div class="accordion-body"><div class="row g-2">
+                                                    <div class="col-6"><label class="form-label">Swarm Size</label><input type="number" class="form-control form-control-sm" id="pso_swarm_size" value="50"></div>
+                                                    <div class="col-6"><label class="form-label">Iterations</label><input type="number" class="form-control form-control-sm" id="pso_max_iters" value="200"></div>
+                                                    <div class="col-4"><label class="form-label">Inertia (w)</label><input type="number" step="any" class="form-control form-control-sm" id="pso_inertia" value="0.85"></div>
+                                                    <div class="col-4"><label class="form-label">Cognitive (c1)</label><input type="number" step="any" class="form-control form-control-sm" id="pso_cognitive" value="2.0"></div>
+                                                    <div class="col-4"><label class="form-label">Social (c2)</label><input type="number" step="any" class="form-control form-control-sm" id="pso_social" value="2.0"></div>
+                                                </div></div></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="mt-3">
+                            <h5><i class="fa-solid fa-rocket me-2"></i>Algorithm Selection</h5>
+                            <div class="row">
+                                <div class="col-6"><div class="form-check"><input class="form-check-input" type="checkbox" value="greedy_heuristic" id="algo_greedy" checked><label class="form-check-label" for="algo_greedy">Greedy</label></div></div>
+                                <div class="col-6"><div class="form-check"><input class="form-check-input" type="checkbox" value="genetic_algorithm" id="algo_ga" checked><label class="form-check-label" for="algo_ga">Genetic Algo.</label></div></div>
+                                <div class="col-6"><div class="form-check"><input class="form-check-input" type="checkbox" value="simulated_annealing" id="algo_sa" checked><label class="form-check-label" for="algo_sa">Sim. Annealing</label></div></div>
+                                <div class="col-6"><div class="form-check"><input class="form-check-input" type="checkbox" value="pso_optimizer" id="algo_pso" checked><label class="form-check-label" for="algo_pso">PSO</label></div></div>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button class="btn btn-success btn-lg" type="button" id="runOptimizationBtn">
+                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                     <i class="fa-solid fa-play me-2"></i> Run Optimization
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8 d-flex flex-column">
+                <div class="card shadow-sm h-100 d-flex flex-column">
+                    <div class="card-header bg-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="resultsTab" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-panel" type="button"><i class="fa-solid fa-map-location-dot me-1"></i> Route Map</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="curves-tab" data-bs-toggle="tab" data-bs-target="#curves-panel" type="button"><i class="fa-solid fa-chart-line me-1"></i> Convergence</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison-panel" type="button"><i class="fa-solid fa-chart-bar me-1"></i> Comparison</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report-panel" type="button"><i class="fa-solid fa-file-alt me-1"></i> Report</button></li>
+                             <li class="nav-item" role="presentation"><button class="nav-link" id="log-tab" data-bs-toggle="tab" data-bs-target="#log-panel" type="button"><i class="fa-solid fa-terminal me-1"></i> Run Log</button></li>
+                        </ul>
+                    </div>
+                    <div class="card-body d-flex flex-column p-3 flex-grow-1">
+                        <div class="tab-content flex-grow-1 d-flex flex-column" id="resultsTabContent">
+                            <div class="tab-pane fade show active d-flex flex-column" id="map-panel" role="tabpanel">
+                                <div class="input-group mb-2">
+                                    <label class="input-group-text" for="mapResultSelect">Display Map:</label>
+                                    <select class="form-select" id="mapResultSelect" disabled><option selected>No results available</option></select>
+                                    <button class="btn btn-outline-primary" type="button" id="openMapBtn" disabled><i class="fa-solid fa-external-link-alt me-1"></i> Open in New Tab</button>
+                                </div>
+                                <div class="results-container">
+                                    <iframe id="mapFrame" sandbox="allow-scripts allow-same-origin" title="Route Map"></iframe>
+                                    <div id="mapPlaceholder" class="placeholder-glow position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                        <span class="placeholder-text">Generate data or run optimization to see the map.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade d-flex flex-column" id="curves-panel" role="tabpanel">
+                                 <div class="d-flex justify-content-end mb-2">
+                                    <button class="btn btn-sm btn-outline-secondary" id="saveIterationPlotBtn" disabled><i class="fa-solid fa-save me-1"></i> Save Plot</button>
+                                </div>
+                                <div id="iterationCurveContainer" class="results-container d-flex justify-content-center align-items-center">
+                                    <span class="text-muted">Convergence curves will appear here.</span>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade d-flex flex-column" id="comparison-panel" role="tabpanel">
+                                <div class="d-flex justify-content-end mb-2">
+                                    <button class="btn btn-sm btn-outline-secondary" id="saveComparisonPlotBtn" disabled><i class="fa-solid fa-save me-1"></i> Save Plot</button>
+                                </div>
+                                <div id="comparisonChartContainer" class="results-container d-flex justify-content-center align-items-center">
+                                    <span class="text-muted">Performance comparison will appear here.</span>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade d-flex flex-column" id="report-panel" role="tabpanel">
+                                <div class="input-group mb-2">
+                                    <label class="input-group-text" for="reportResultSelect">Display Report:</label>
+                                    <select class="form-select" id="reportResultSelect" disabled><option selected>No results available</option></select>
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" id="saveReportBtn" disabled><i class="fa-solid fa-save me-1"></i> Save Report</button>
+                                </div>
+                                <pre id="reportDisplayArea" class="results-container font-monospace p-2"></pre>
+                            </div>
+
+                            <div class="tab-pane fade d-flex flex-column" id="log-panel" role="tabpanel">
+                                <div class="flex-grow-1 min-vh-0">
+                                    <pre id="logDisplayArea" class="results-container bg-dark font-monospace p-2 text-muted h-100"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-3 pt-2 border-top">
+            <div id="statusBar" class="d-flex justify-content-between align-items-center text-muted small">
+                <div id="statusText">Ready</div>
+                <div id="progressBar" class="progress w-25" style="height: 10px; display: none;">
+                    <div id="progressBarInner" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title"><i class="fa-solid fa-circle-exclamation me-2"></i>An Error Occurred</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="errorModalBody">
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

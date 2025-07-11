@@ -1,0 +1,28 @@
+# Python Dependencies for the Logistics Optimization System
+# Specifies minimum versions, allowing for installation of newer compatible releases.
+
+# --- Core Backend Libraries (Original) ---
+
+# Core library for numerical operations
+numpy>=1.26.4
+
+# Powerful data analysis and manipulation library
+pandas>=2.2.2
+
+# Core library for creating static, animated, and interactive visualizations
+matplotlib>=3.8.4
+
+# Library for creating interactive leaflet maps
+folium>=0.17.0
+
+
+# --- API Server Libraries  ---
+
+# A modern, fast (high-performance) web framework for building APIs
+fastapi>=0.111.0
+
+# The ASGI server used to run the FastAPI application
+uvicorn[standard]>=0.30.1
+
+# Required by FastAPI for handling file uploads (e.g., loading config files)
+python-multipart>=0.0.9
