@@ -85,6 +85,7 @@
 
 项目采用模块化的结构设计，职责清晰，易于扩展。
 
+```
 logistics_optimization/
 │
 ├── api_server.py            # 后端API服务器 (FastAPI)，项目主入口
@@ -119,6 +120,7 @@ logistics_optimization/
 │   └── plot_generator.py    # Matplotlib 图表（迭代、对比）生成
 │
 └── output/                  # 默认输出目录，存放运行结果
+```
 
 
 ## 技术栈
