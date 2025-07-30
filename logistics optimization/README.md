@@ -85,6 +85,7 @@ The system generates a structured text report for each algorithm's optimization 
 
 The project uses a modular design with clear separation of concerns, making it easy to extend.
 
+```
 logistics_optimization/
 │
 ├── api_server.py            # Backend API server (FastAPI), main entry point
@@ -119,6 +120,7 @@ logistics_optimization/
 │   └── plot_generator.py    # Matplotlib chart generator
 │
 └── output/                  # Default output directory for run results
+```
 
 
 ## Tech Stack
